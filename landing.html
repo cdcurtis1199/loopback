@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Loopback — Every meeting ends with a list</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght@500;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0F1720;
+    --surface: #182430;
+    --surface-raised: #1E2C39;
+    --line: #2A3B4A;
+    --ink: #E8ECEF;
+    --muted: #8B9BAA;
+    --dim: #5A6B7A;
+    --amber: #E8A33D;
+    --teal: #4FA787;
+    --coral: #C97B5B;
+  }
+  * { box-sizing: border-box; }
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: 'IBM Plex Sans', sans-serif; -webkit-font-smoothing: antialiased;
+  }
+  a { color: inherit; }
+  button:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid var(--amber); outline-offset: 3px; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 24px; }
+
+  /* NAV */
+  nav {
+    position: sticky; top: 0; z-index: 10;
+    background: rgba(15,23,32,0.88); backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--line);
+  }
+  .nav-inner {
+    max-width: 1080px; margin: 0 auto; padding: 16px 24px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .logo {
+    font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.14em;
+    color: var(--ink); display: flex; align-items: center; gap: 8px;
+  }
+  .logo .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--amber); }
+  .nav-links { display: flex; gap: 28px; font-size: 13px; color: var(--muted); }
+  .nav-links a { text-decoration: none; }
+  .nav-links a:hover { color: var(--ink); }
+  .nav-cta {
+    font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 13px;
+    background: var(--amber); color: var(--bg); padding: 9px 16px; border-radius: 4px; text-decoration: none;
+  }
+
+  /* HERO */
+  .hero { padding: 88px 0 64px; position: relative; }
+  .eyebrow {
+    display: flex; align-items: center; gap: 12px; margin-bottom: 28px;
+    font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.12em; color: var(--amber);
+  }
+  .eyebrow .rule { flex: 0 0 32px; height: 1px; background: var(--amber); opacity: 0.4; }
+  h1 {
+    font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700;
+    font-size: clamp(38px, 6vw, 64px); line-height: 1.04; letter-spacing: -0.01em;
+    margin: 0 0 22px; max-width: 760px;
+  }
+  h1 .accent { color: var(--teal); }
+  .hero-sub { font-size: 17px; color: var(--muted); max-width: 500px; line-height: 1.6; margin: 0 0 36px; }
+  .hero-actions { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; margin-bottom: 20px; }
+  .btn-primary {
+    font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 15px;
+    background: var(--amber); color: var(--bg); padding: 13px 24px; border-radius: 4px; text-decoration: none;
+    border: none; cursor: pointer;
+  }
+  .btn-ghost {
+    font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 15px;
+    background: transparent; color: var(--ink); padding: 13px 24px; border-radius: 4px; text-decoration: none;
+    border: 1px solid var(--line); cursor: pointer;
+  }
+  .hero-note { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--dim); }
+
+  /* TICKET DEMO STRIP */
+  .demo-strip {
+    margin-top: 56px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px;
+    padding: 22px; overflow: hidden;
+  }
+  .demo-strip .demo-label {
+    font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.1em; color: var(--dim);
+    margin-bottom: 16px;
+  }
+  .demo-line {
+    position: relative; display: flex; align-items: center; gap: 14px;
+    background: var(--surface-raised); border-radius: 4px; padding: 12px 18px; margin-bottom: 8px;
+  }
+  .demo-line:last-child { margin-bottom: 0; }
+  .demo-dot { width: 16px; height: 16px; border-radius: 50%; border: 2px solid; flex-shrink: 0; }
+  .demo-task { flex: 1; font-size: 14px; }
+  .demo-owner { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--dim); }
+  .demo-deadline { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--muted); }
+
+  /* SECTION */
+  section { padding: 72px 0; border-top: 1px solid var(--line); }
+  .section-head { margin-bottom: 44px; max-width: 560px; }
+  .section-tag {
+    font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.12em; color: var(--amber);
+    margin-bottom: 12px;
+  }
+  h2 {
+    font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: clamp(26px, 3.5vw, 34px);
+    margin: 0 0 12px; letter-spacing: -0.01em;
+  }
+  .section-sub { color: var(--muted); font-size: 15px; line-height: 1.6; }
+
+  /* HOW IT WORKS */
+  .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  .step {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 24px;
+    position: relative;
+  }
+  .step-num {
+    font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--dim); margin-bottom: 14px;
+  }
+  .step h3 {
+    font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 18px; margin: 0 0 8px;
+  }
+  .step p { color: var(--muted); font-size: 14px; line-height: 1.55; margin: 0; }
+
+  /* FEATURES */
+  .feat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 2px; background: var(--line); border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+  .feat {
+    background: var(--surface); padding: 24px;
+  }
+  .feat-mark { font-family: 'IBM Plex Mono', monospace; font-size: 18px; margin-bottom: 12px; display: block; }
+  .feat h3 { font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 16px; margin: 0 0 6px; }
+  .feat p { color: var(--muted); font-size: 13.5px; line-height: 1.55; margin: 0; }
+
+  /* SOCIAL PROOF / STAT */
+  .stat-row { display: flex; gap: 48px; flex-wrap: wrap; }
+  .stat .num { font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 40px; color: var(--teal); }
+  .stat .label { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--dim); margin-top: 4px; }
+
+  /* CTA / SIGNUP */
+  .signup-card {
+    background: var(--surface-raised); border: 1px solid var(--teal); border-radius: 8px;
+    padding: 44px; text-align: center; position: relative;
+  }
+  .signup-card h2 { max-width: none; }
+  .signup-form {
+    display: flex; gap: 10px; max-width: 420px; margin: 24px auto 12px; flex-wrap: wrap; justify-content: center;
+  }
+  .signup-form input[type="email"] {
+    flex: 1 1 220px; background: var(--bg); border: 1px solid var(--line); border-radius: 4px;
+    padding: 12px 14px; color: var(--ink); font-family: 'IBM Plex Sans', sans-serif; font-size: 14px;
+  }
+  .signup-form button {
+    background: var(--teal); color: var(--bg); border: none; border-radius: 4px; padding: 12px 22px;
+    font-family: 'IBM Plex Sans Condensed', sans-serif; font-weight: 700; font-size: 14px; cursor: pointer;
+  }
+  .signup-note { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--dim); }
+  .form-status { min-height: 20px; font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--teal); margin-top: 8px; }
+
+  footer {
+    border-top: 1px solid var(--line); padding: 32px 0; font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px; color: var(--dim);
+  }
+
+  @media (max-width: 760px) {
+    .steps { grid-template-columns: 1fr; }
+    .nav-links { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <div class="logo"><span class="dot"></span>LOOPBACK</div>
+    <div class="nav-links">
+      <a href="#how">How it works</a>
+      <a href="#features">Features</a>
+      <a href="pricing.html">Pricing</a>
+    </div>
+    <a class="nav-cta" href="app.html">Start free</a>
+  </div>
+</nav>
+
+<div class="wrap">
+  <section class="hero" style="border-top: none;">
+    <div class="eyebrow"><div class="rule"></div>NEVER LOSE A COMMITMENT AGAIN</div>
+    <h1>Every meeting ends<br>with a list. <span class="accent">Loopback<br>makes sure it gets done.</span></h1>
+    <p class="hero-sub">Paste a transcript, record live, or drop in your notes. Loopback pulls out every commitment — who owns it, when it's due — and turns it into a ticket you can actually track.</p>
+    <div class="hero-actions">
+      <a class="btn-primary" href="app.html">Start free — try it now</a>
+      <a class="btn-ghost" href="pricing.html">See pricing</a>
+    </div>
+    <div class="hero-note">Works right now, free, no signup — open it and paste a transcript</div>
+
+    <div class="demo-strip">
+      <div class="demo-label">A MEETING BECOMES THIS</div>
+      <div class="demo-line">
+        <span class="demo-dot" style="border-color:#E8A33D;"></span>
+        <span class="demo-task">Update pricing deck with new tiers</span>
+        <span class="demo-owner">MIKE</span>
+        <span class="demo-deadline">Thursday</span>
+      </div>
+      <div class="demo-line">
+        <span class="demo-dot" style="border-color:#4FA787;"></span>
+        <span class="demo-task">Document API rate limits for partner call</span>
+        <span class="demo-owner">PRIYA</span>
+        <span class="demo-deadline">Friday</span>
+      </div>
+      <div class="demo-line">
+        <span class="demo-dot" style="border-color:#7C93B0;"></span>
+        <span class="demo-task">Follow up with legal on NDA redlines</span>
+        <span class="demo-owner">MIKE</span>
+        <span class="demo-deadline">Today</span>
+      </div>
+    </div>
+  </section>
+
+  <section id="how">
+    <div class="section-head">
+      <div class="section-tag">HOW IT WORKS</div>
+      <h2>Three steps, no setup.</h2>
+      <p class="section-sub">No integrations to configure before you see value. Paste something in and watch it work.</p>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">01 · CAPTURE</div>
+        <h3>Paste or record</h3>
+        <p>Drop in a transcript, rough notes, or record the meeting live right in your browser.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">02 · EXTRACT</div>
+        <h3>Tickets appear</h3>
+        <p>Every commitment gets pulled out with an owner and a deadline, no manual tagging.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">03 · TRACK</div>
+        <h3>Nothing slips</h3>
+        <p>Check items off, filter by owner, export to your task tool, or hand teammates their own board.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="features">
+    <div class="section-head">
+      <div class="section-tag">FEATURES</div>
+      <h2>Built around one job.</h2>
+      <p class="section-sub">Not another transcription tool. Loopback only cares about what people committed to.</p>
+    </div>
+    <div class="feat-grid">
+      <div class="feat"><span class="feat-mark" style="color:#E8A33D;">＋</span><h3>Owner &amp; deadline tagging</h3><p>Every ticket is assigned automatically from what was actually said.</p></div>
+      <div class="feat"><span class="feat-mark" style="color:#4FA787;">＋</span><h3>Live recording</h3><p>Capture a meeting straight from your browser, no app to install.</p></div>
+      <div class="feat"><span class="feat-mark" style="color:#7C93B0;">＋</span><h3>Search &amp; filter</h3><p>Find any commitment by owner, meeting, or keyword in seconds.</p></div>
+      <div class="feat"><span class="feat-mark" style="color:#C97B5B;">＋</span><h3>Markdown export</h3><p>Copy your board into Notion, Slack, or anywhere else in one click.</p></div>
+      <div class="feat"><span class="feat-mark" style="color:#E8A33D;">＋</span><h3>Shared team board</h3><p>Everyone's open items in one place, sorted by who's behind.</p></div>
+      <div class="feat"><span class="feat-mark" style="color:#4FA787;">＋</span><h3>Meeting history</h3><p>Every extraction is tagged and saved, so nothing gets buried.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="stat-row">
+      <div class="stat"><div class="num">5</div><div class="label">FREE TRANSCRIPTS / MONTH</div></div>
+      <div class="stat"><div class="num">&lt;30s</div><div class="label">FROM PASTE TO TICKETS</div></div>
+      <div class="stat"><div class="num">$9</div><div class="label">STARTING PRICE, UNLIMITED USE</div></div>
+    </div>
+  </section>
+
+  <section id="signup">
+    <div class="signup-card">
+      <div class="section-tag" style="justify-content:center; display:flex;">COMING NEXT</div>
+      <h2>The free tool works today. Team boards are next.</h2>
+      <p class="section-sub" style="margin: 0 auto;">Try Loopback free right now — no signup needed. Leave your email and we'll tell you the moment shared team boards and integrations go live.</p>
+      <form class="signup-form" onsubmit="handleSignup(event)">
+        <input type="email" id="signup-email" placeholder="you@work.com" required aria-label="Email address" />
+        <button type="submit" id="signup-btn">Notify me</button>
+      </form>
+      <div class="form-status" id="form-status"></div>
+      <div class="signup-note" id="signup-count">We'll email you the moment early access opens.</div>
+      <div class="signup-note" style="margin-top:10px;"><a href="app.html" style="color:var(--teal); text-decoration:underline;">Or just try the free tool now →</a></div>
+    </div>
+  </section>
+</div>
+
+<footer>
+  <div class="wrap" style="display:flex; justify-content:space-between; width:100%; flex-wrap:wrap; gap:12px;">
+    <span>LOOPBACK © 2026</span>
+    <span>Built for people who hate re-reading meeting notes.</span>
+  </div>
+</footer>
+
+<script>
+  async function refreshCount() {
+    const noteEl = document.getElementById('signup-count');
+    try {
+      const result = await window.storage.list('signup:', true);
+      const count = result && result.keys ? result.keys.length : 0;
+      if (count > 0) {
+        noteEl.textContent = count === 1
+          ? "1 person is on the early access list."
+          : count + " people are on the early access list.";
+      }
+    } catch (e) {
+      // storage not available yet, leave default copy
+    }
+  }
+
+  async function handleSignup(e) {
+    e.preventDefault();
+    const emailInput = document.getElementById('signup-email');
+    const btn = document.getElementById('signup-btn');
+    const status = document.getElementById('form-status');
+    const email = emailInput.value.trim();
+    if (!email) return;
+
+    btn.disabled = true;
+    btn.textContent = "Saving…";
+    try {
+      const key = 'signup:' + email.toLowerCase();
+      await window.storage.set(key, JSON.stringify({ email, joinedAt: new Date().toISOString() }), true);
+      status.textContent = "You're on the list — we'll email " + email + ".";
+      emailInput.value = '';
+      refreshCount();
+    } catch (err) {
+      status.textContent = "Something went wrong saving that. Try again?";
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "Notify me";
+    }
+  }
+
+  refreshCount();
+</script>
+
+</body>
+</html>
